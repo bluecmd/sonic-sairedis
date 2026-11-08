@@ -811,6 +811,12 @@ void RedisClient::getVidsForRids(
 {
     SWSS_LOG_ENTER();
 
+    if (count == 0)
+    {
+        // HMGET needs at least one field
+        return;
+    }
+
     swss::RedisCommand hmget;
 
     std::vector<std::string> cmds;

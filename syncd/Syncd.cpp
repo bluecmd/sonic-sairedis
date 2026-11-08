@@ -3419,7 +3419,13 @@ sai_status_t Syncd::processBulkOidCreate(
 
     m_translator->insertRidsAndVids(createdRids.size(), createdRids.data(), createdVids.data());
 
-    if (objectType == SAI_OBJECT_TYPE_PORT)
+    /*
+     * With every port of the bulk refused by the vendor SAI there is nothing
+     * to discover, and an empty discovery issues HMGET RIDTOVID without
+     * fields, which redis rejects. That exception put syncd in shutdown-wait
+     * and took orchagent down with it; return the statuses instead.
+     */
+    if (objectType == SAI_OBJECT_TYPE_PORT && !createdRids.empty())
     {
         m_switches.at(switchVid)->onPostPortsCreate(createdRids.size(), createdRids.data());
     }
